@@ -1,5 +1,3 @@
-package PathFindingVisualizer;
-
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.event.ChangeEvent;
@@ -7,7 +5,7 @@ import javax.swing.event.ChangeListener;
 
 public class KnightsTourUI extends JFrame {
 
-    private static final int N = 8; // Chessboard size
+    private static final int N = 4; // Chessboard size
     private JButton[][] buttons = new JButton[N][N]; // Buttons for each chessboard cell
     private int[][] solution = new int[N][N]; // To keep track of the knight's moves
     private JSlider speedSlider; // Slider to control speed

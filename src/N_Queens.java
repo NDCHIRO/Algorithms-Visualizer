@@ -63,8 +63,9 @@ public class N_Queens {
             {
                 //mark the cell
                 jLabel[i][col].setBackground(Color.GREEN);
-                //jLabel[i][col].setIcon(imgThisImg);
                 jLabel[i][col].setText("Q");
+                //just for SET FONT SIZE
+                jLabel[i][col].setFont(new Font("Arial", Font.PLAIN, 80));
                 board[i][col]=1;
 
                 if(NQutil(col+1))
@@ -88,7 +89,7 @@ public class N_Queens {
             for (int j = 0; j < size; j++) {
                 makeDelay(20);
                 board[i][j] = 0;
-                //jLabel[i][j].setBackground(Color.WHITE);
+                jLabel[i][j].setBackground(Color.WHITE);
 
             }
         }
@@ -129,7 +130,7 @@ public class N_Queens {
     {
         jFrame = new JFrame("N Queens visualizer");
         jFrame.setLayout(new GridLayout(size,size));
-        jFrame.setSize(500,500);
+        jFrame.setSize(800,800);
         jFrame.setDefaultCloseOperation(jFrame.EXIT_ON_CLOSE);
 
 
@@ -145,11 +146,19 @@ public class N_Queens {
                 jFrame.add(jLabel[i][j]);
             }
         }
+
         jFrame.setVisible(true);
+
+    }
+    public void startSolve()
+    {
+        N_Queens n_queens = new N_Queens();
+        n_queens.solveNQeens();
     }
     public static void main(String[] args) {
         N_Queens n_queens = new N_Queens();
         n_queens.solveNQeens();
     }
+
 }
 

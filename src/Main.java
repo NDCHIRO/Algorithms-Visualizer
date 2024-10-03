@@ -1,26 +1,29 @@
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class Main {
+    static JFrame jFrame;
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Algorithms visualizer app");
-        JButton jButton = new JButton();
-        jButton.setText("N Queens visualizer");
+        jFrame = new JFrame("algorithms visualizer");
+        jFrame.setLayout(new GridLayout(8,8));
+        jFrame.setSize(800,800);
+        jFrame.setDefaultCloseOperation(jFrame.EXIT_ON_CLOSE);
+        jFrame.setVisible(true);
 
-        jButton.addActionListener(new ActionListener() {
+        JButton button = new JButton("N Q");
+        button.setSize(100,100);
+        button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                jFrame.setVisible(false); // Hide current frame
                 N_Queens n_queens = new N_Queens();
-                n_queens.solveNQeens();
+                n_queens.startSolve();
+                //n_queens.solveNQeens();
+
             }
         });
-        frame.add(jButton);
-        frame.setSize(500,500);
-        frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-
-
-        //new N_Queens();
+        jFrame.add(button);
     }
 }
