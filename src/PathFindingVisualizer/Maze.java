@@ -1,133 +1,104 @@
 package PathFindingVisualizer;
-
-import javax.swing.*;
 import java.awt.*;
-import java.awt.List;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
-import java.util.*;
+import java.util.Random;
+import java.util.Stack;
 
-public class Maze extends  JFrame{
-    static final long serialVersionUID = 19670916;
+public class Maze {
+    private int rows;
+    private int cols;
+    private int[][] maze;
+    private Point start;
+    private Point end;
+    private Stack<Point> stack;
+    private boolean isDone;
 
-    protected GridPanel gridPanel = null;
-
-    public Maze() {
-
-        setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-
-        createGui();
-        setVisible( true );
+    public Maze(int rows, int cols) {
+        this.rows = rows;
+        this.cols = cols;
+        resetMaze();
     }
 
-    protected void createGui() {
+    public void resetMaze() {
+        maze = new int[rows][cols];
+        stack = new Stack<>();
+        start = new Point(1, 1);  // Fixed start at the top-left corner
+        end = new Point(rows - 3, cols - 3);  // Fixed end point at (rows-2, cols-2)
 
-        setSize( 600, 600 );
-        setTitle( "Test Grid" );
-
-        gridPanel = new GridPanel();
-
-        add( gridPanel );
-    }
-
-    public static void main(String args[]) {
-
-        Maze mf = new Maze();
-    }
-}
-
-
-class GridPanel extends JPanel {
-    void GridPanel ()
-    {
-
-    }
-     GridPanel(int x)
-    {
-
-    }
-    //private static final long serialVersionUID = -5341480790176820445L;
-
-    private final int NUM_SQUARES = 100;
-    private final int RECT_SIZE = 30;
-    private ArrayList<Rectangle> grid = null;
-
-    public GridPanel() {
-
-        // Build the grid
-        grid = new ArrayList<Rectangle>( NUM_SQUARES );
-        for( int y=0; y < NUM_SQUARES / 10; ++y ) {
-            for( int x=0; x < NUM_SQUARES / 10; ++x ) {
-                Rectangle rect = new Rectangle( x * RECT_SIZE, y * RECT_SIZE, RECT_SIZE, RECT_SIZE );
-                grid.add( rect );
-            }
-        }
-
-
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                for (Shape s : grid) {
-                    if (s.contains(e.getPoint())) {//check if mouse is clicked within shape
-
-                        //we can either just print out the object class name
-                        System.out.println("Clicked a " + s.getClass().getName());
-
-                        //or check the shape class we are dealing with using instance of with nested if
-                        if (s instanceof Rectangle2D) {
-                            System.out.println("Clicked a rectangle");
-                        } else if (s instanceof Ellipse2D) {
-                            System.out.println("Clicked a circle");
-                        }
-
-                    }
+        // Initialize the maze with walls
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (i == 0 || j == 0 || i == rows - 1 || j == cols - 1) {
+                    maze[i][j] = 0;  // Border walls
+                } else {
+                    maze[i][j] = 0;  // Initially walls, will change to paths
                 }
             }
-        });
-        setSize( 600, 400 );
+        }
 
-
+        stack.push(start);
+        maze[start.x][start.y] = 1;  // Mark start as path
+        isDone = false;
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-
-        super.paintComponent( g );
-
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, 600, 400);
-
-        
-        //q.add(5);
-        // paint the grid
-        for( Rectangle r : grid ) {
-
-            g.setColor(Color.BLACK);
-            g.drawRect( r.x, r.y, r.width, r.height );
+    // Step-by-step generation of the maze using DFS
+    public boolean step() {
+        if (stack.isEmpty()) {
+            isDone = true;
+            return false;  // Maze generation is complete
         }
-        
+
+        Point current = stack.peek();  // Use peek() to check the current point without popping
+        int x = current.x;
+        int y = current.y;
+
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};  // Down, Up, Right, Left
+        shuffleArray(directions);  // Shuffle directions for randomness
+
+        boolean foundNewPath = false;
+        for (int[] dir : directions) {
+            int newX = x + dir[0] * 2;
+            int newY = y + dir[1] * 2;
+
+            if (newX > 0 && newX < rows - 1 && newY > 0 && newY < cols - 1 && maze[newX][newY] == 0) {
+                maze[x + dir[0]][y + dir[1]] = 1;  // Mark path between current and new point
+                maze[newX][newY] = 1;  // Mark new point as path
+                stack.push(new Point(newX, newY));  // Add new point to the stack
+                foundNewPath = true;
+                break;  // Break after finding one path to slow down generation
+            }
+        }
+
+        if (!foundNewPath) {
+            stack.pop();  // Backtrack if no new path is found
+        }
+
+        return true;  // Return true to indicate the generation is still in progress
     }
-}
-class grid extends GridPanel {
-    grid() {
-        System.out.println("sa");
-        try {
-            GridPanel gridPanel = new GridPanel();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+
+    // Helper function to shuffle directions
+    private void shuffleArray(int[][] array) {
+        Random rand = new Random();
+        for (int i = array.length - 1; i > 0; i--) {
+            int j = rand.nextInt(i + 1);
+            int[] temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
         }
-        int x = 0;
-        int[] arr = {1,2,3,3,4,5,6,7,8,9,19};
-        HashMap<Integer,Integer> hashMap = new HashMap<>();
-        hashMap.put(3,0);
-        hashMap.put(5,0);
-        hashMap.put(2,0);
-        hashMap.put(7,0);
-        hashMap.put(9,0);
+    }
 
+    public int[][] getMaze() {
+        return maze;
+    }
 
+    public Point getStart() {
+        return start;
+    }
+
+    public Point getEnd() {
+        return end;
+    }
+
+    public boolean isDone() {
+        return isDone;
     }
 }
