@@ -9,27 +9,69 @@ public class MazeSolver {
     private static Set<Point> visited = new HashSet<>();  // Tracks visited nodes
     private static Stack<Point> stack = new Stack<>();  // Stack for DFS
     private static Queue<Point> queue = new LinkedList<>();  // Queue for BFS
+    private static PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fScore));  // Priority queue for A*
 
-    // Initialize the DFS and start solving
-    public static void initializeDFS(int[][] maze, Point start) {
+
+
+    public static void clearMaze() {
         path.clear();
         solutionPath.clear();
         visited.clear();
         stack.clear();
+        queue.clear();
+    }
+
+    // Initialize the DFS and start solving
+    public static void initializeDFS(int[][] maze, Point start) {
+        clearMaze();
         stack.push(start);  // Start DFS from the start point
     }
 
     // Initialize BFS for step-by-step solving
     public static void initializeBFS(int[][] maze, Point start) {
-        path.clear();
-        solutionPath.clear();
-        visited.clear();
-        queue.clear();
+        clearMaze();
         queue.add(start);  // Start BFS from the start point
         visited.add(start);  // Mark start as visited
     }
 
-    // Step-by-step DFS with backtracking visualization
+    public static void initializeAStar(int[][] maze, Point start) {
+        path.clear();
+        solutionPath.clear();
+        visited.clear();
+        openSet.clear();
+        openSet.add(new Node(start, 0));  // Add start node with fScore = 0
+        visited.add(start);  // Mark start as visited
+    }
+
+
+    // Step-by-step A* with visualization
+    public static boolean stepAStar(int[][] maze, Point end) {
+        if (openSet.isEmpty()) {
+            return false;  // A* is complete, no path found
+        }
+
+        Node current = openSet.poll();  // Dequeue the node with the lowest fScore
+        path.add(current.point);  // Add current point to the exploration path
+
+        if (current.point.equals(end)) {
+            solutionPath.addAll(path);  // Add the entire path as the solution if end is reached
+            return false;  // Maze is solved
+        }
+
+        List<Point> neighbors = getNeighbors(maze, current.point);
+        for (Point neighbor : neighbors) {
+            if (!visited.contains(neighbor)) {
+                double gScore = calculateGScore(current.point, neighbor);  // Distance from start
+                double fScore = gScore + heuristic(neighbor, end);  // fScore = gScore + hScore
+                openSet.add(new Node(neighbor, fScore));
+                visited.add(neighbor);  // Mark neighbor as visited
+            }
+        }
+
+        return true;  // Return true to indicate A* is still in progress
+    }
+
+
     public static boolean stepDFS(int[][] maze, Point end) {
         if (stack.isEmpty()) {
             return false;  // DFS is complete
@@ -46,12 +88,15 @@ public class MazeSolver {
         visited.add(current);
         List<Point> neighbors = getNeighbors(maze, current);
 
+        // Shuffle the neighbors to add randomness in direction selection
+        Collections.shuffle(neighbors);
+
         boolean moved = false;
         for (Point neighbor : neighbors) {
             if (!visited.contains(neighbor)) {
                 stack.push(neighbor);
                 moved = true;
-                break;  // Move to the first unvisited neighbor
+                break;  // Move to the first unvisited neighbor (randomized)
             }
         }
 
@@ -111,4 +156,15 @@ public class MazeSolver {
     public static List<Point> getSolutionPath() {
         return solutionPath;
     }
+
+    // Heuristic function for A* (Manhattan distance)
+    private static double heuristic(Point p1, Point p2) {
+        return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
+    }
+
+    // Calculate gScore (simple distance)
+    private static double calculateGScore(Point from, Point to) {
+        return 1;  // Assume uniform cost for moving between points
+    }
+
 }

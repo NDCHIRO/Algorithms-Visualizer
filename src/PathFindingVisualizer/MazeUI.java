@@ -1,30 +1,13 @@
 package PathFindingVisualizer;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.List;  // Correct generic List from java.util
-import java.util.ArrayList;  // For using ArrayList
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class MazeUI extends JFrame {
-    private int rows = 20;
-    private int cols = 20;
+    private int rows = 30;
+    private int cols = 30;
     private int cellSize = 25;
     private Maze maze;
     private MazePanel mazePanel;
@@ -32,6 +15,10 @@ public class MazeUI extends JFrame {
     private Timer solveTimerDFS;
     private Timer solveTimerBFS;
     private int stepIndex = 0;
+    private Timer solveTimerAStar;
+    JButton solveDFSButton;
+    JButton solveBFSButton;
+    JButton solveAStarButton;
 
     public MazeUI() {
         setTitle("Maze Generator and Solver");
@@ -41,12 +28,16 @@ public class MazeUI extends JFrame {
         maze = new Maze(rows, cols);
         mazePanel = new MazePanel();
 
-        JButton regenerateButton = new JButton("Regenerate Maze (Step-by-Step)");
+        solveDFSButton = new JButton("Solve with DFS");
+        solveBFSButton = new JButton("Solve with BFS");
+        solveAStarButton = new JButton("Solve with A*");
+
+        JButton regenerateButton = new JButton("Generate Maze (Step-by-Step)");
         regenerateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                maze.resetMaze();
-                mazePanel.repaint();
+
+                // Stop all timers if they are running
                 if (solveTimerDFS.isRunning() || solveTimerBFS.isRunning()) {
                     solveTimerDFS.stop();
                     solveTimerBFS.stop();
@@ -54,11 +45,23 @@ public class MazeUI extends JFrame {
                 if (generationTimer.isRunning()) {
                     generationTimer.stop();
                 }
-                generationTimer.start();  // Start step-by-step maze generation
+                MazeSolver.clearMaze();
+                // Reset the maze data and UI
+                maze.resetMaze(); // Assuming this resets the internal state of the maze
+
+                // Clear any visual elements related to the previous solution
+                mazePanel.repaint(); // Repaint the panel to reflect the reset state
+
+                // Optionally reset other UI elements like buttons if necessary
+                //regenerateButton.setEnabled(false); // Disable the button until maze is fully regenerated
+
+                // Start maze generation in step-by-step mode
+                generationTimer.start(); // Start step-by-step maze generation
+
             }
         });
 
-        JButton solveDFSButton = new JButton("Solve with DFS (Step-by-Step)");
+
         solveDFSButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -67,7 +70,7 @@ public class MazeUI extends JFrame {
             }
         });
 
-        JButton solveBFSButton = new JButton("Solve with BFS (Step-by-Step)");
+
         solveBFSButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -76,36 +79,62 @@ public class MazeUI extends JFrame {
             }
         });
 
+
+        solveAStarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MazeSolver.initializeAStar(maze.getMaze(), maze.getStart());
+                solveTimerAStar.start();  // Start step-by-step A* solving
+            }
+        });
+
+
         // Timer for step-by-step maze generation
-        generationTimer = new Timer(100, new ActionListener() {
+        generationTimer = new Timer(50, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!maze.isDone()) {
+                    // Re-enable the regenerate button after generation finishes (in your generation complete method)
+                    enableAlgorithmsButtons(false);
                     maze.step();  // Perform one step of maze generation
                     mazePanel.repaint();  // Update UI after each step
                 } else {
                     generationTimer.stop();  // Stop timer once maze is fully generated
+                    // Re-enable the regenerate button after generation finishes (in your generation complete method)
+                    enableAlgorithmsButtons(true);
                 }
             }
         });
 
         // Timer for step-by-step DFS solving
-        solveTimerDFS = new Timer(100, new ActionListener() {
+        solveTimerDFS = new Timer(75, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!MazeSolver.stepDFS(maze.getMaze(), maze.getEnd())) {
                     solveTimerDFS.stop();  // Stop DFS timer when maze is solved
+                    repaintCorrectPath();
                 }
                 mazePanel.repaint();  // Repaint to show each step
             }
         });
 
         // Timer for step-by-step BFS solving
-        solveTimerBFS = new Timer(100, new ActionListener() {
+        solveTimerBFS = new Timer(75, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!MazeSolver.stepBFS(maze.getMaze(), maze.getEnd())) {
                     solveTimerBFS.stop();  // Stop BFS timer when maze is solved
+                }
+                mazePanel.repaint();  // Repaint to show each step
+            }
+        });
+
+        // Timer for step-by-step A* solving
+        solveTimerAStar = new Timer(75, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!MazeSolver.stepAStar(maze.getMaze(), maze.getEnd())) {
+                    solveTimerAStar.stop();  // Stop A* timer when maze is solved
                 }
                 mazePanel.repaint();  // Repaint to show each step
             }
@@ -127,12 +156,25 @@ public class MazeUI extends JFrame {
         buttonPanel.add(regenerateButton);
         buttonPanel.add(solveDFSButton);  // Add DFS button
         buttonPanel.add(solveBFSButton);  // Add BFS button
+        buttonPanel.add(solveAStarButton);  // Add BFS button
 
         // Add the button panel to the bottom of the UI
         add(mazePanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
         setVisible(true);
+    }
+
+    private void enableAlgorithmsButtons(boolean enable) {
+        solveDFSButton.setEnabled(enable);
+        solveBFSButton.setEnabled(enable);
+        solveAStarButton.setEnabled(enable);
+    }
+
+    // General method to repaint the correct path (solution) in red
+    private void repaintCorrectPath() {
+        // The final correct path is stored in MazeSolver.getSolutionPath()
+        mazePanel.repaint();  // Repaint the panel to update the path display
     }
 
     // Panel to display the maze and the solution path

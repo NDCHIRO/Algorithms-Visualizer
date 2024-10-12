@@ -22,7 +22,7 @@ public class Maze {
         maze = new int[rows][cols];
         stack = new Stack<>();
         start = new Point(1, 1);  // Fixed start at the top-left corner
-        end = new Point(rows - 3, cols - 3);  // Fixed end point at (rows-2, cols-2)
+        end = new Point(rows - 3, cols - 3);  // Fixed end point at (rows-3, cols-3)
 
         // Initialize the maze with walls
         for (int i = 0; i < rows; i++) {
