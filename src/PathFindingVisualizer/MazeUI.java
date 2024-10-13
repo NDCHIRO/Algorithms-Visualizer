@@ -204,11 +204,17 @@ public class MazeUI extends JFrame {
             g.fillRect(p.y * cellSize, p.x * cellSize, cellSize, cellSize);
         }
 
-        // Draw the final solution path
-            g.setColor(Color.RED);  // Correct path (solution)
+            // Draw the final solution path
+                g.setColor(Color.RED);  // Correct path (solution)
+                for (Point p : MazeSolver.getSolutionPath()) {
+                g.fillRect(p.y * cellSize, p.x * cellSize, cellSize, cellSize);
+            }
+            // Draw the final correct solution path in blue
+            g.setColor(Color.BLUE);  // Correct path (solution)
             for (Point p : MazeSolver.getSolutionPath()) {
-            g.fillRect(p.y * cellSize, p.x * cellSize, cellSize, cellSize);
-        }
+                g.fillRect(p.y * cellSize, p.x * cellSize, cellSize, cellSize);
+            }
+
 
         // Draw the start and end points
             g.setColor(Color.GREEN);  // Start point

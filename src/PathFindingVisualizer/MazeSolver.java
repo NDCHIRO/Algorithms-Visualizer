@@ -10,6 +10,7 @@ public class MazeSolver {
     private static Stack<Point> stack = new Stack<>();  // Stack for DFS
     private static Queue<Point> queue = new LinkedList<>();  // Queue for BFS
     private static PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fScore));  // Priority queue for A*
+    private static Map<Point, Point> cameFrom = new HashMap<>();  // Parent tracking for backtracking the solution path
 
 
 
@@ -24,12 +25,14 @@ public class MazeSolver {
     // Initialize the DFS and start solving
     public static void initializeDFS(int[][] maze, Point start) {
         clearMaze();
+        cameFrom.clear();  // Reset the parent tracking
         stack.push(start);  // Start DFS from the start point
     }
 
     // Initialize BFS for step-by-step solving
     public static void initializeBFS(int[][] maze, Point start) {
         clearMaze();
+        cameFrom.clear();  // Reset the parent tracking
         queue.add(start);  // Start BFS from the start point
         visited.add(start);  // Mark start as visited
     }
@@ -39,6 +42,7 @@ public class MazeSolver {
         solutionPath.clear();
         visited.clear();
         openSet.clear();
+        cameFrom.clear();  // Reset the parent tracking
         openSet.add(new Node(start, 0));  // Add start node with fScore = 0
         visited.add(start);  // Mark start as visited
     }
@@ -54,7 +58,7 @@ public class MazeSolver {
         path.add(current.point);  // Add current point to the exploration path
 
         if (current.point.equals(end)) {
-            solutionPath.addAll(path);  // Add the entire path as the solution if end is reached
+            reconstructPath(current.point);  // Reconstruct the correct path once the goal is reached
             return false;  // Maze is solved
         }
 
@@ -65,12 +69,21 @@ public class MazeSolver {
                 double fScore = gScore + heuristic(neighbor, end);  // fScore = gScore + hScore
                 openSet.add(new Node(neighbor, fScore));
                 visited.add(neighbor);  // Mark neighbor as visited
+                cameFrom.put(neighbor, current.point);  // Track the parent node for path reconstruction
             }
         }
 
         return true;  // Return true to indicate A* is still in progress
     }
 
+    // Reconstruct the path from the goal to the start
+    private static void reconstructPath(Point current) {
+        solutionPath.clear();
+        while (current != null) {
+            solutionPath.add(0, current);  // Add nodes to the solution path in reverse order
+            current = cameFrom.get(current);  // Go to the parent node
+        }
+    }
 
     public static boolean stepDFS(int[][] maze, Point end) {
         if (stack.isEmpty()) {
@@ -81,7 +94,7 @@ public class MazeSolver {
         path.add(current);  // Add the current point to the visualization path
 
         if (current.equals(end)) {
-            solutionPath.addAll(path);  // Add the entire path as the solution if end is reached
+            reconstructPath(current);  // Reconstruct the correct path once the goal is reached
             return false;  // Maze is solved
         }
 
@@ -96,6 +109,7 @@ public class MazeSolver {
             if (!visited.contains(neighbor)) {
                 stack.push(neighbor);
                 moved = true;
+                cameFrom.put(neighbor, current);  // Track the parent node for path reconstruction
                 break;  // Move to the first unvisited neighbor (randomized)
             }
         }
@@ -117,7 +131,7 @@ public class MazeSolver {
         path.add(current);  // Add current point to the exploration path
 
         if (current.equals(end)) {
-            solutionPath.addAll(path);  // Add the entire path as the solution if end is reached
+            reconstructPath(current);  // Reconstruct the correct path once the goal is reached
             return false;  // Maze is solved
         }
 
@@ -125,6 +139,7 @@ public class MazeSolver {
         for (Point neighbor : neighbors) {
             if (!visited.contains(neighbor)) {
                 queue.add(neighbor);
+                cameFrom.put(neighbor, current);  // Track the parent node for path reconstruction
                 visited.add(neighbor);  // Mark neighbor as visited
             }
         }
