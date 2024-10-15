@@ -45,7 +45,7 @@ public class MazeUI extends JFrame {
                 if (generationTimer.isRunning()) {
                     generationTimer.stop();
                 }
-                MazeSolver.clearMaze();
+                MazeSolverUtils.clearMaze();
                 // Reset the maze data and UI
                 maze.resetMaze(); // Assuming this resets the internal state of the maze
 
@@ -65,7 +65,7 @@ public class MazeUI extends JFrame {
         solveDFSButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                MazeSolver.initializeDFS(maze.getMaze(), maze.getStart());
+                DFSSolver.initializeDFS(maze.getMaze(), maze.getStart());
                 solveTimerDFS.start();  // Start step-by-step DFS solving
             }
         });
@@ -74,7 +74,7 @@ public class MazeUI extends JFrame {
         solveBFSButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                MazeSolver.initializeBFS(maze.getMaze(), maze.getStart());
+                BFSMazeSovler.initializeBFS(maze.getMaze(), maze.getStart());
                 solveTimerBFS.start();  // Start step-by-step BFS solving
             }
         });
@@ -83,7 +83,7 @@ public class MazeUI extends JFrame {
         solveAStarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                MazeSolver.initializeAStar(maze.getMaze(), maze.getStart());
+                AStarMazeSolver.initializeAStar(maze.getMaze(), maze.getStart());
                 solveTimerAStar.start();  // Start step-by-step A* solving
             }
         });
@@ -110,7 +110,7 @@ public class MazeUI extends JFrame {
         solveTimerDFS = new Timer(75, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!MazeSolver.stepDFS(maze.getMaze(), maze.getEnd())) {
+                if (!DFSSolver.stepDFS(maze.getMaze(), maze.getEnd())) {
                     solveTimerDFS.stop();  // Stop DFS timer when maze is solved
                     repaintCorrectPath();
                 }
@@ -122,7 +122,7 @@ public class MazeUI extends JFrame {
         solveTimerBFS = new Timer(75, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!MazeSolver.stepBFS(maze.getMaze(), maze.getEnd())) {
+                if (!BFSMazeSovler.stepBFS(maze.getMaze(), maze.getEnd())) {
                     solveTimerBFS.stop();  // Stop BFS timer when maze is solved
                 }
                 mazePanel.repaint();  // Repaint to show each step
@@ -133,7 +133,7 @@ public class MazeUI extends JFrame {
         solveTimerAStar = new Timer(75, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!MazeSolver.stepAStar(maze.getMaze(), maze.getEnd())) {
+                if (!AStarMazeSolver.stepAStar(maze.getMaze(), maze.getEnd())) {
                     solveTimerAStar.stop();  // Stop A* timer when maze is solved
                 }
                 mazePanel.repaint();  // Repaint to show each step
@@ -200,18 +200,18 @@ public class MazeUI extends JFrame {
 
         // Draw DFS/BFS exploration path
             g.setColor(Color.GRAY);  // Wrong paths (explored but not solution)
-            for (Point p : MazeSolver.getPath()) {
+            for (Point p : MazeSolverUtils.getPath()) {
             g.fillRect(p.y * cellSize, p.x * cellSize, cellSize, cellSize);
         }
 
             // Draw the final solution path
                 g.setColor(Color.RED);  // Correct path (solution)
-                for (Point p : MazeSolver.getSolutionPath()) {
+                for (Point p : MazeSolverUtils.getSolutionPath()) {
                 g.fillRect(p.y * cellSize, p.x * cellSize, cellSize, cellSize);
             }
             // Draw the final correct solution path in blue
             g.setColor(Color.BLUE);  // Correct path (solution)
-            for (Point p : MazeSolver.getSolutionPath()) {
+            for (Point p : MazeSolverUtils.getSolutionPath()) {
                 g.fillRect(p.y * cellSize, p.x * cellSize, cellSize, cellSize);
             }
 
