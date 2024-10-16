@@ -27,11 +27,7 @@ public class Maze {
         // Initialize the maze with walls
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                if (i == 0 || j == 0 || i == rows - 1 || j == cols - 1) {
-                    maze[i][j] = 0;  // Border walls
-                } else {
-                    maze[i][j] = 0;  // Initially walls, will change to paths
-                }
+                maze[i][j] = 0;  // Initially walls, will change to paths
             }
         }
 
@@ -56,7 +52,7 @@ public class Maze {
 
         boolean foundNewPath = false;
         for (int[] dir : directions) {
-            int newX = x + dir[0] * 2;
+            int newX = x + dir[0] * 2;      //this is a general rule to create maze as this will create walls naturally
             int newY = y + dir[1] * 2;
 
             if (newX > 0 && newX < rows - 1 && newY > 0 && newY < cols - 1 && maze[newX][newY] == 0) {
