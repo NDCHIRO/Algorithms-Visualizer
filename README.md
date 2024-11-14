@@ -4,7 +4,7 @@
 
 Maze Solver Visualizer is a **Java-based application** that generates and solves mazes using popular pathfinding algorithms like **Depth-First Search (DFS)**, **Breadth-First Search (BFS)**, and **A* (A-star)**. This project provides an interactive interface for visualizing how each algorithm finds its way through a randomly generated maze.
 
-### I wrote an article to build something like this:
+### I wrote an article so that if anyone wants to build something like this or add new things into it:
 https://medium.com/p/02d719b0bce6
 
 ### 🎬 Demo Video
